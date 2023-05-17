@@ -1,0 +1,25 @@
+---
+title: "Proyecto Análisis Multivariado"
+date: "`r Sys.Date()`"
+author: "Mauricio Gómez y Francisca Vilca Sánchez"
+output:
+  rmdformats::downcute:
+    default_style: "dark"
+    downcute_theme: "default"
+---
+
+```{r, include = F}
+datos <- rio::import("salud_fetos.csv")
+
+library(tidyverse)
+library(caret)
+library(MASS)
+library(ROCR)
+library(lift)
+library(polycor)
+library(ltm)
+library(scales)
+library(yardstick)
+library(beepr)
+```
+
