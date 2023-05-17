@@ -1,0 +1,29 @@
+# Base de datos de salud de fetos
+
+# Descripción:
+
+- 2126 observaciones
+- 22 atributos:
+	
+	1. LB: Frecuencia cardíaca fetal (latidos por minutos)
+	2. AC: Número de aceleraciones por segundo
+	3. FM: Número de movimientos fetales por segundo
+	4. UC: Número de contracciones uterinas por segundo
+	5. DL: Número de desaceleraciones ligeras por segundo
+	6. DS: Número de desaceleraciones severas por segundo
+	7. DP: Número de desaceleraciones prolongadas por segundo
+	8. ASTV: Porcentaje de tiempo con variabilidad a corto plazo anormal
+	9. MSTV: Valor promedio de variabilidad a corto plazo
+	10. ALTV: Porcentaje de tiempo con variabilidad a largo plazo anormal
+	11. MLTV: Valor promedio de variabilidad a largo plazo
+	12. Width: Anchura del histograma de la frecuencia cardíaca fetal
+	13. Min: Mínimo del histograma de la frecuencia cardíaca fetal
+	14. Max: Máximo del histograma de la frecuencia cardíaca fetal
+	15. Nmax: Número de picos del histograma de la frecuencia cardíaca fetal
+	16. Nzeros: Número de ceros del histograma de la frecuencia cardíaca fetal
+	17. Mode: Moda del histograma de la frecuencia cardíaca fetal
+	18. Mean: Media del histograma de la frecuencia cardíaca fetal
+	19. Median: Mediana del histograma de la frecuencia cardíaca fetal
+	20. Variance: Varianza del histograma de la frecuencia cardíaca fetal
+	21. Tendency: Tendencia del histograma de la frecuencia cardíaca fetal.
+	22. Health: Clasificación hecha por expertos de la salud del feto (1=normal, 2=sospechoso, 3=patológica)
