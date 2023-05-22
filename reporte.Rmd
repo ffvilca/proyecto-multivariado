@@ -11,16 +11,33 @@ output:
 ```{r, include = F}
 datos <- rio::import("salud_fetos.csv")
 
-library(tidyverse)
-library(caret)
-library(MASS)
-library(ROCR)
-library(lift)
-library(polycor)
-library(ltm)
-library(scales)
-library(yardstick)
+library(rio)
+library(dplyr)
 library(beepr)
+library(ggplot2)
+library(ggrepel)
+library(kableExtra)
+library(TeachingDemos)
+library(pracma)
+library(mvnormtest)
+library(MVN)
+library(EnvStats)
 ```
 
+# Introducción 
+
+# Análisis Exploratorio
+
+```{r}
+
+```
+
+
+# Creación de PCA
+
+# Análisis de Discriminante 
+
+# Conclusión
+
+# Bibliografía
 
