@@ -21,25 +21,15 @@ library(EnvStats)
 library(FactoMineR)
 library(factoextra)
 library(tidyverse)
-<<<<<<< HEAD
-=======
+
 library(cluster)
->>>>>>> f3c102210f4e0610f6a63fab859bd85030d84ed6
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
-str(datos)
-View(datos)
-
-x11()
-pairs(datos)
-round(cor(datos),3)
-corrplot::corrplot(cor(datos), method = "ellipse")
 
 PCA_centrado=prcomp(datos, center=TRUE, scale=TRUE)
-PCA
+
 PCA_centrado
-fviz_screeplot(PCA, main="PCA",  addlabels = TRUE)
 fviz_screeplot(PCA_centrado, main="PCA centrado y reescalado",  addlabels = TRUE)
 summary(PCA_centrado)
 
@@ -47,9 +37,7 @@ fviz_pca_var(PCA_centrado,col.var="contrib",
              gradient.cols = c("yellow", "red"),
              repel = TRUE,  
 )
-rename(datos, )
-
-comp <- prcomp(datos, scale = T) 
+summary(PCA_centrado) 
 
 screeplot(comp)
 
@@ -90,6 +78,7 @@ new_data_2 = datos %>%
 tabla_conf_2 <- table(new_data_2$cluster, new_data_2$tipo,
                       dnn = list("cluster", "grupo real"))
 
+
 round(prop.table(tabla_conf_2),3)
 
 hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
@@ -98,7 +87,7 @@ hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
 fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
   theme_bw() + labs(title = "Hierarchical k-means Clustering")
       
-fviz_cluster(object = modelo_1, repel = TRUE, ellipse.type = "norm",
+fviz_cluster(object = modelo_2, repel = TRUE, ellipse.type = "norm",
             pallete = "jco") + 
   theme_bw() + 
   labs(title = "Fuzzy Cluster plot")
