@@ -21,7 +21,10 @@ library(EnvStats)
 library(FactoMineR)
 library(factoextra)
 library(tidyverse)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3dcdf35a7bd9ee2d9ccda590271119fd5d6fed7b
 library(cluster)
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
