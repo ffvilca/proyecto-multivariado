@@ -18,22 +18,20 @@ library(pracma)
 library(mvnormtest)
 library(MVN)
 library(EnvStats)
-<<<<<<< HEAD
 library(FactoMineR)
 library(factoextra)
 library(tidyverse)
-=======
-library(factoextra)
->>>>>>> 820be7c3004e47f6bb9e632317db196390227087
+library(cluster)
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
 str(datos)
 View(datos)
 
-<<<<<<< HEAD
 x11()
 pairs(datos)
+round(cor(datos),3)
+corrplot::corrplot(cor(datos), method = "ellipse")
 
 PCA_centrado=prcomp(datos, center=TRUE, scale=TRUE)
 PCA
@@ -42,15 +40,11 @@ fviz_screeplot(PCA, main="PCA",  addlabels = TRUE)
 fviz_screeplot(PCA_centrado, main="PCA centrado y reescalado",  addlabels = TRUE)
 summary(PCA_centrado)
 
-corrplot::datos
 fviz_pca_var(PCA_centrado,col.var="contrib",
              gradient.cols = c("yellow", "red"),
              repel = TRUE,  
 )
 rename(datos, )
-=======
-round(cor(datos),3)
-corrplot::corrplot(cor(datos), method = "ellipse")
 
 comp <- prcomp(datos, scale = T) 
 
@@ -65,14 +59,43 @@ fviz_pca_biplot(comp, repel = TRUE,
 
 new_datos <- comp$rotation[,1:6]
 
-modelo <- kmeans(datos, centers = 3,nstart = 50)
+# kmeans
 
-new_data = datos %>%  
+modelo_1 <- kmeans(datos, centers = 3,nstart = 50)
+
+new_data_1 = datos %>%  
   as.data.frame() %>% 
-  mutate(cluster = modelo$cluster) %>%
+  mutate(cluster = modelo_1$cluster) %>%
   mutate(cluster = as.factor(cluster),
          tipo   = as.factor(datos$Health)) 
 
-table(new_data$cluster, new_data$tipo,
+tabla_conf_1 <- table(new_data_1$cluster, new_data_1$tipo,
       dnn = list("cluster", "grupo real"))
->>>>>>> 820be7c3004e47f6bb9e632317db196390227087
+
+round(prop.table(tabla_conf_1),3)
+
+# funny
+
+modelo_2 <- fanny(datos, k=2)
+
+new_data_2 = datos %>%  
+  as.data.frame() %>% 
+  mutate(cluster = modelo_2$cluster) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health)) 
+
+tabla_conf_2 <- table(new_data_2$cluster, new_data_2$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_2),3)
+
+hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
+                           hc.method = "complete", k = 3)
+
+fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
+  theme_bw() + labs(title = "Hierarchical k-means Clustering")
+      
+fviz_cluster(object = modelo_1, repel = TRUE, ellipse.type = "norm",
+            pallete = "jco") + 
+  theme_bw() + 
+  labs(title = "Fuzzy Cluster plot")
