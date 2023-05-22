@@ -28,6 +28,9 @@ datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 str(datos)
 View(datos)
 
+table(datos$Health)
+prop.table(table(datos$Health))
+
 x11()
 pairs(datos)
 round(cor(datos),3)
@@ -57,7 +60,7 @@ fviz_pca_biplot(comp, repel = TRUE,
                 col.ind = "#696969"  # Individuals color
 )
 
-new_datos <- comp$rotation[,1:6]
+new_datos <- PCA_centrado$x[,1:6]
 
 # kmeans
 
@@ -88,6 +91,51 @@ tabla_conf_2 <- table(new_data_2$cluster, new_data_2$tipo,
                       dnn = list("cluster", "grupo real"))
 
 round(prop.table(tabla_conf_2),3)
+
+hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
+                           hc.method = "complete", k = 3)
+
+fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
+  theme_bw() + labs(title = "Hierarchical k-means Clustering")
+
+fviz_cluster(object = modelo_2, repel = TRUE, ellipse.type = "norm",
+             pallete = "jco") + 
+  theme_bw() + 
+  labs(title = "Fuzzy Cluster plot")
+
+
+# CON 6 VARIABLES ---------------------------------------------------
+
+# kmeans
+
+modelo_1.1 <- kmeans(new_datos, centers = 3,nstart = 50)
+
+new_data_1.1 = new_datos %>%  
+  as.data.frame() %>% 
+  mutate(cluster = modelo_1.1$cluster) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health)) 
+
+tabla_conf_1.1 <- table(new_data_1.1$cluster, new_data_1.1$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_1.1),3)
+
+# fanny
+
+modelo_2.1 <- fanny(new_datos, k=3)
+
+new_data_2.1 = new_datos %>%  
+  as.data.frame() %>% 
+  mutate(cluster = modelo_2.1$clustering) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health))
+
+
+tabla_conf_2.1 <- table(new_data_2.1$cluster, new_data_2.1$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_2.1),3)
 
 hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
                            hc.method = "complete", k = 3)
