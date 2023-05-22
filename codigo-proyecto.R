@@ -18,3 +18,8 @@ library(pracma)
 library(mvnormtest)
 library(MVN)
 library(EnvStats)
+
+datos <- rio::import("salud_fetos.csv")
+
+str(datos)
+View(datos)
