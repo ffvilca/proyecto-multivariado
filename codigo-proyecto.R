@@ -18,13 +18,9 @@ library(pracma)
 library(mvnormtest)
 library(MVN)
 library(EnvStats)
-<<<<<<< HEAD
 library(FactoMineR)
 library(factoextra)
 library(tidyverse)
-=======
-library(factoextra)
->>>>>>> 820be7c3004e47f6bb9e632317db196390227087
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
