@@ -21,10 +21,7 @@ library(EnvStats)
 library(FactoMineR)
 library(factoextra)
 library(tidyverse)
-<<<<<<< HEAD
-=======
 library(cluster)
->>>>>>> f3c102210f4e0610f6a63fab859bd85030d84ed6
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
@@ -98,7 +95,7 @@ hkmeans_cluster <- hkmeans(x = datos, hc.metric = "euclidean",
 fviz_cluster(object = hkmeans_cluster, pallete = "jco", repel = TRUE) +
   theme_bw() + labs(title = "Hierarchical k-means Clustering")
       
-fviz_cluster(object = modelo_1, repel = TRUE, ellipse.type = "norm",
+fviz_cluster(object = modelo_2, repel = TRUE, ellipse.type = "norm",
             pallete = "jco") + 
   theme_bw() + 
   labs(title = "Fuzzy Cluster plot")
