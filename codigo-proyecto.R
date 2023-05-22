@@ -116,6 +116,7 @@ new_data_1.1 = new_datos %>%
   mutate(cluster = as.factor(cluster),
          tipo   = as.factor(datos$Health)) 
 
+
 tabla_conf_1.1 <- table(new_data_1.1$cluster, new_data_1.1$tipo,
                       dnn = list("cluster", "grupo real"))
 
@@ -123,11 +124,23 @@ round(prop.table(tabla_conf_1.1),3)
 
 # fanny
 
-modelo_2.1 <- fanny(new_datos, k=3)
+modelo_2.1 <- diana(new_datos)
+
+plot(as.hclust(modelo_2.1), ylab = "", xlab = "", sub = "", main = "Diana", cex = 0.8)
+clusters_diana <- cutree(tree = as.hclust(modelo_2.1), k = 3)
+table(clusters_diana, tipo, dnn = list("clusters", "tipo de cáncer"))
+
+x11()
+modelo_2.2=agnes(new_datos,method="average" )
+plot(as.hclust(modelo_2.2), ylab = "", xlab = "", sub = "", main = "Agnes", cex = 0.8)
+clusters_diana <- cutree(tree = as.hclust(modelo_2.2), k = 3)
+table(clusters_diana, tipo, dnn = list("clusters", "tipo de cáncer"))
+
+
 
 new_data_2.1 = new_datos %>%  
   as.data.frame() %>% 
-  mutate(cluster = modelo_2.1$clustering) %>%
+  mutate(cluster = modelo_2.1$) %>%
   mutate(cluster = as.factor(cluster),
          tipo   = as.factor(datos$Health))
 
