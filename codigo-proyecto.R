@@ -22,6 +22,7 @@ library(FactoMineR)
 library(factoextra)
 library(tidyverse)
 library(cluster)
+library(patchwork)
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
@@ -162,9 +163,87 @@ fviz_cluster(object = modelo_2, repel = TRUE, ellipse.type = "norm",
 fviz_pca_ind(PCA_centrado, col.ind = "#00AFBB",
              repel = TRUE, habillage = datos$Health)
 
-a <- cbind(PCA_centrado$x,datos$Health)
-x11()
-a %>%
+
+# ideas profe -------------------------------------------------------------
+
+correlaciones <- round(cor(datos),3)
+corrplot::corrplot(cor(datos), method = "ellipse")
+
+var_sign <- datos[,c(which(correlaciones[,22]> 0.3 | correlaciones[,22] < -0.3))]
+
+# prueba con k_means
+
+modelo_3 <- kmeans(var_sign, centers = 3,nstart = 50)
+
+new_data_3 = var_sign %>%  
   as.data.frame() %>% 
-  ggplot(aes(PC1,PC2, = Health))+
-  geom_point()
+  mutate(cluster = modelo_3$cluster) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health)) 
+
+tabla_conf_3 <- table(new_data_3$cluster, new_data_3$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_3),3)
+
+a <- var_sign %>% 
+  mutate(Health_2 = factor(Health)) %>% 
+  ggplot(aes(x = ALTV, y = ASTV, colour = Health_2)) +
+  geom_point() +
+  labs(title = "Datos reales")
+
+b <- datos %>% 
+  as.data.frame() %>% 
+  mutate(cluster = as.factor(modelo_3$cluster)) %>% 
+  ggplot(aes(x = ALTV, y = ASTV, colour = cluster)) +
+  geom_point() +
+  labs(title = "Asignaciones de clusters")
+
+a+b
+
+# mejor hacer PCA
+
+PCA_centrado_2 <- prcomp(var_sign, center=TRUE, scale=TRUE)
+PCA_centrado_2
+fviz_screeplot(PCA_centrado_2, main="PCA centrado y reescalado",  addlabels = TRUE)
+summary(PCA_centrado_2)
+
+fviz_pca_var(PCA_centrado_2,col.var="contrib",
+             gradient.cols = c("yellow", "red"),
+             repel = TRUE,  
+)
+
+sel_pca <- PCA_centrado_2$x[,c("PC1","PC2")]
+
+modelo_4 <- kmeans(sel_pca, centers = 3,nstart = 50)
+
+new_data_4 = sel_pca %>%  
+  as.data.frame() %>% 
+  mutate(cluster = modelo_4$cluster) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health)) 
+
+tabla_conf_4 <- table(new_data_4$cluster, new_data_4$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_4),3)
+
+c <- sel_pca %>%  
+  as.data.frame() %>% 
+  mutate(Health_2 = factor(datos$Health)) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = Health_2)) +
+  geom_point() +
+  labs(title = "Datos reales dps de PCA")
+
+d <- sel_pca %>% 
+  as.data.frame() %>% 
+  mutate(cluster = as.factor(modelo_4$cluster)) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = cluster)) +
+  geom_point() +
+  labs(title = "Asignaciones de clusters")
+
+c
+d
+c+d
+
+# k means con pca mejora

@@ -26,6 +26,10 @@ library(EnvStats)
 
 # Introducción 
 
+En el siguiente reporte, se hará el análisis de la base de datos `salud_fetos.csv` que contiene la información sobre `r nrow(datos)` registros de fetos con las características extraídas de exámenes de cardiotocograma, que luego fueron clasificados por obstetras expertos en el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo principal de proyecto es generar un modelo que sea capaz de predecir el grupo en el que se debería agrupar un nuevo feto dados las características que este presenta.
+
+Para lograr esto, primero revisaremos los datos para comprender como funcionan, luego revisaremos que variables presentan mayor correlación para que con ellas se creé el modelo, una vez seleccionada las variables, mediante el algoritmo k-means se crearán los grupos y luego se revisará que tan bien funciona el modelo.
+
 # Análisis Exploratorio
 
 ```{r}

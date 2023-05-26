@@ -7,7 +7,7 @@
 
         <meta name="author" content="Mauricio Gómez y Francisca Vilca Sánchez" />
     
-        <meta name="date" content="2023-05-22" />
+        <meta name="date" content="2023-05-26" />
     
     <title>Proyecto Análisis Multivariado</title>
 
@@ -1520,7 +1520,7 @@ Prism.languages.r={comment:/#.*/,string:{pattern:/(['"])(?:\\.|(?!\1)[^\\\r\n])*
            <span class="glyphicon glyphicon-user"></span> Mauricio Gómez
 y Francisca Vilca Sánchez
       </p>
-         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-05-22</p>
+         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-05-26</p>
            
 
    
@@ -1530,6 +1530,19 @@ y Francisca Vilca Sánchez
 <div class="page-content has-page-title">
 <div id="introducción" class="section level1">
 <h1>Introducción</h1>
+<p>En el siguiente reporte, se hará el análisis de la base de datos
+<code>salud_fetos.csv</code> que contiene la información sobre 1
+registros de fetos con las características extraídas de exámenes de
+cardiotocograma, que luego fueron clasificados por obstetras expertos en
+el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo
+principal de proyecto es generar un modelo que sea capaz de predecir el
+grupo en el que se debería agrupar un nuevo feto dados las
+características que este presenta.</p>
+<p>Para lograr esto, primero revisaremos los datos para comprender como
+funcionan, luego revisaremos que variables presentan mayor correlación
+para que con ellas se creé el modelo, una vez seleccionada las
+variables, mediante el algoritmo k-means se crearán los grupos y luego
+se revisará que tan bien funciona el modelo.</p>
 </div>
 <div id="análisis-exploratorio" class="section level1">
 <h1>Análisis Exploratorio</h1>
