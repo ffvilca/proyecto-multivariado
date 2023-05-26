@@ -169,7 +169,7 @@ fviz_pca_ind(PCA_centrado, col.ind = "#00AFBB",
 correlaciones <- round(cor(datos),3)
 corrplot::corrplot(cor(datos), method = "ellipse")
 
-var_sign <- datos[,c(which(correlaciones[,22]> 0.3 | correlaciones[,22] < -0.3))]
+var_sign <- datos[,c(which(correlaciones[,22]> 0.2 | correlaciones[,22] < -0.2))]
 
 # prueba con k_means
 
@@ -213,7 +213,7 @@ fviz_pca_var(PCA_centrado_2,col.var="contrib",
              repel = TRUE,  
 )
 
-sel_pca <- PCA_centrado_2$x[,c("PC1","PC2")]
+sel_pca <- PCA_centrado_2$x[,c("PC1","PC2","PC3")]
 
 modelo_4 <- kmeans(sel_pca, centers = 3,nstart = 50)
 
