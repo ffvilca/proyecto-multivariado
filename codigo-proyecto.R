@@ -23,6 +23,8 @@ library(factoextra)
 library(tidyverse)
 library(cluster)
 library(patchwork)
+library(MASS)
+library(caret)
 
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 
@@ -247,3 +249,39 @@ d
 c+d
 
 # k means con pca mejora
+
+# qda()
+
+# con PCA
+
+sel_pca_2 <- sel_pca %>%  
+  as.data.frame() %>% 
+  mutate(Health_2 = factor(datos$Health))
+
+modelo_5 <- qda(Health_2 ~., sel_pca_2)
+
+pred_qda <- predict(modelo_5, sel_pca_2)$class
+
+tabla_conf_5 <- table(pred_qda, new_data_5$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+round(prop.table(tabla_conf_5),3)
+
+confusionMatrix(table(pred_qda,datos$Health))
+
+e <- sel_pca_2 %>%  
+  as.data.frame() %>%  
+  ggplot(aes(x = PC1, y = PC2, colour = Health_2)) +
+  geom_point() +
+  labs(title = "Datos reales dps de PCA")
+
+f <- sel_pca_2 %>% 
+  as.data.frame() %>% 
+  mutate(cluster = pred_qda) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = cluster)) +
+  geom_point() +
+  labs(title = "Asignaciones de clusters")
+
+e
+f
+e+f
