@@ -107,9 +107,17 @@ Se observa que; La salud del feto y aceleraciones por segundo van en direcciones
 ```{r}
 fviz_pca_ind(PCA_cent_res, col.ind = "cos2", 
              gradient.cols =c("gray", "purple", "beige"),
-             repel = F
+             repel = F, 
              )
 ```
+
+Al gráficar los datos individualemnte notamos que existe un grupo central, y dos grupos secundarios a la izquierda y arriba del grupo central, así que hacemos una nueva base con los componentes principales seleccionados.
+
+```{r}
+datos_3 <- PCA_cent_res$x[,c("PC1","PC2","PC3")]
+head(datos_3)
+```
+
 
 
 # Análisis de Discriminante 
