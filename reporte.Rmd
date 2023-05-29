@@ -2,10 +2,9 @@
 title: "Proyecto Análisis Multivariado"
 date: "`r Sys.Date()`"
 author: "Aaron Mauricio Gómez Jimenéz y Francisca Vilca Sánchez"
-output:
-  rmdformats::downcute:
-    default_style: "dark"
-    downcute_theme: "default"
+output: pdf_document
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r, include = F}
