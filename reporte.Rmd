@@ -96,13 +96,20 @@ Notamos que solo hay 3 componentes con lambda mayor a 1, así que concluimos que
 
 ```{r}
 fviz_pca_var(PCA_cent_res,col.var="contrib",
-             gradient.cols = c("yellow", "red"),
+             gradient.cols = c("yellow", "blue"),
              repel = TRUE,  
 )
 ```
 
+Se observa que; La salud del feto y aceleraciones por segundo van en direcciones contrarias, es decir, estas dos variables afectan al segundo componente pero con signo distinto, las variables desaceleraciones prolongadas (DP) y  Porcentaje de tiempo con variabilidad a largo plazo anormal (ALTV) no estan correlacionadas, ya que sus vectores son perpendiculares, los vectores que mas afectan al primer componente son la media, mediana y moda del histograma de frecuencia fetal.
 
 
+```{r}
+fviz_pca_ind(PCA_cent_res, col.ind = "cos2", 
+             gradient.cols =c("gray", "purple", "beige"),
+             repel = F
+             )
+```
 
 
 # Análisis de Discriminante 
