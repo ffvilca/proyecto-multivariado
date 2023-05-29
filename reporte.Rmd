@@ -20,98 +20,103 @@ library(kableExtra)
 library(TeachingDemos)
 library(pracma)
 library(mvnormtest)
-library(MVN)
+library(MASS)
 library(EnvStats)
 library(GGally)
 library(xfun)
 library(factoextra)
+library(caret)
+library(patchwork)
 ```
 
 # Introducción 
 
-En el siguiente reporte, se hará el análisis de la base de datos `salud_fetos.csv` que contiene la información sobre 2126  registros de fetos con las características extraídas de exámenes de cardiotocograma, que luego fueron clasificados por obstetras expertos en el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo principal del proyecto es generar un modelo que sea capaz de predecir el grupo en el que se debería agrupar un nuevo feto dados las características que este presenta.
+En el siguiente reporte, se hará el análisis de la base de datos `salud_fetos.csv` que contiene la información sobre 2126 registros de fetos con las características extraídas de exámenes de cardiotocograma, que luego fueron clasificados por obstetras expertos en el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo principal del proyecto es generar un modelo que sea capaz de predecir el grupo en el que se debería agrupar un nuevo feto dados las características que este presenta.
 
-Para lograr esto, primero revisaremos los datos para comprender como funcionan, luego revisaremos que variables presentan mayor correlación para que con ellas se creé el modelo, una vez seleccionada las variables, mediante el algoritmo k-means se crearán los grupos y luego se revisará que tan bien funciona el modelo.
+Para lograr esto, primero revisaremos los datos para comprender como funcionan, es decir, un análisis exploratorio, luego revisaremos que variables presentan mayor correlación para que con ellas se creé el modelo a utilizar, una vez seleccionada las variables, mediante algún algoritmo de análisis de conglomerados se crearán los grupos y luego se revisará que tan bien funcionan en el modelo.
 
 # Análisis Exploratorio
 
-Cargamos nuestra base de datos y hacemos un resumen para ver que variables y que tipo de variables tenemos
+Lo primero ha hacer es cargar la base de datos y se harña un resumen para ver que variables y de que tipo son:
 
-```{r}
+```{r echo=FALSE}
 datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
 summary(datos)
 ```
 
-Como podemos ver, tenemos 22 variables, todas númericas.
+Como se puede ver, se tienen 22 variables, todas númericas, sin embargo, la variable `Health` aquella que queremos predecir, es una variable categórica,
 
+Realizando el análisis explotario de los datos para ver si se encuentra relación entre las variables, o alguna información estadística que nos ayude a encontrar relaciones, dependencias o grupos que se puedan formar con las variables de la muestra.
 
-Realizaremos un análisis explotario de los datos para ver si encontramos relación entre las variables, o alguna información estadistica que nos ayude a encontrar relaciones, dependencias o grupos que se puedan formar con las variables de nuestra muestra.
+Se comenzará haciendo un correlograma de los datos, como se ve en la Figura 1:
 
-Primero, haremos un correlograma de los datos.
+```{r out.width="60%", fig.align="center", fig.cap= "Figura 1: Correlograma de la salud de los fetos", echo=FALSE, message=FALSE} 
 
-```{r}
 correlaciones <- round(cor(datos),3)
 corrplot::corrplot(cor(datos), method = "circle")
 ```
 
-Notamos que la variable LB (Frecuencia Cardiaca del Feto) esta relacionada linealmente con la media, moda y mediana.
-Las otra correlaciones como MSTV (Valor promedio de variación)y el peso tiene una relación lineal positiva baja-moderada.
-El número de desaceleraciones ligeras (DL) y el minímo de la frecuencia cárdiaca tiene una relación lineal inversa ligera, aunque tambien DL tiene una relación positiva con el peso.
+Es posible notar que la variable LB (Frecuencia Cardiaca del Feto) esta relacionada linealmente con la media, moda y mediana. Las otra correlaciones como MSTV (Valor promedio de variación)y el peso tiene una relación lineal positiva baja-moderada. El número de desaceleraciones ligeras (DL) y el minímo de la frecuencia cárdiaca tiene una relación lineal inversa ligera, aunque tambien DL tiene una relación positiva con el peso.
 
-Al analizar los datos vemos que en muchas variables no existe relación, por lo que filtraremos las variables más significativas en términos de correlación.
+Al analizar los datos se ve que en muchas variables no existe relación, por lo que se filtrarán las variables más significativas en términos de correlación.
 
 ```{r}
 datos_2<- datos[,c(which(correlaciones[,22]> 0.2 | correlaciones[,22] < -0.2))]
 str(datos_2)
 ```
-Al realizar el filtrado, nos quedamos con 11 variables, es decir redujimos a la mitad las variables iniciales.
 
-```{r}
+Al realizar el filtrado, solo 11 variables cumplen con las condiciones, es decir, se redujo a la mitad las variables iniciales.
+
+```{r echo=FALSE}
 head(datos_2)
 ```
 
 # Creación de PCA
 
-En el análisis exploratorio de datos hemos descartado algunas variables, pero no significa que tengamos las variables que mejor explican la varianza de los datos, para ello haremos un Análisis de Componentes Principales con las base datos_2, tambien centraremos y reescalaremos los datos e imprimimos un resumen para ver con cuantos componentes alcanzamos una variabilidad significante (70%).
+En el análisis exploratorio de datos se han descartado algunas variables, pero no significa que se tengan las variables que mejor explican la varianza de los datos, para ello haremos un Análisis de Componentes Principales con las base datos_2, tambien se centrarán y reescalán los datos e imprimimos un resumen para ver con cuantos componentes alcanzamos una variabilidad significante (70%).
 
 ```{r}
 PCA_cent_res <- prcomp(datos_2, center=TRUE, scale=TRUE)
 summary(PCA_cent_res)
 ```
 
-La proporción acumulativa de la varianza nos dice que con 3 componentes alcanzamos el 68.47% de las varianza, para confirmar haremos tambien un método gráfico para verificar con la regla del codo.
+La proporción acumulativa de la varianza dice que con 3 componentes alcanzamos el 68.47% de las varianza, para confirmar se hará tambien un método gráfico para verificar utilizando la regla del codo.
 
-```{r}
+```{r out.width="60%", fig.align="center", fig.cap= "Figura 2: Gráfico de explicación de la varianza", echo=FALSE, message=FALSE} 
+
 fviz_screeplot(PCA_cent_res, main="PCA centrado y reescalado",  addlabels = TRUE)
 ```
 
-Gráficamente vemos que la curva se dobla en el cuarto componente, ahora dado que dos criterios que se utilizan normalmente nos dicen que nos podemos quedar con 3 y 4 componentes, usaremos otro criterio donde elegimos las lambdas mayores a 1.
+Gráficamente se ve que la curva se dobla en el cuarto componente, ahora dado que dos criterios que se utilizan normalmente dicen que es posible quedarse con 3 y 4 componentes, se usará otro criterio donde elegimos las lambdas mayores a 1.
 
 ```{r}
-PCA_cent_res
+PCA_cent_res$sdev
 ```
 
 
-Notamos que solo hay 3 componentes con lambda mayor a 1, así que concluimos que los mas viable es quedarse con 3 componentes principales, veremos graficamente la dirección de las variables, tomando en cuenta solo dos dimensiones (55%).
+Es claro notar, que solo hay 3 componentes con lambda mayor a 1, así que se concluyé que los más viable es quedarse con 3 componentes principales, se verá graficamente, en la Figura 3, la dirección de las variables, tomando en cuenta solo dos dimensiones (55%).
 
-```{r}
+```{r out.width="60%", fig.align="center", fig.cap= "Figura 3: Gráfico de las PC1 y PC2", echo=FALSE, message=FALSE} 
+
 fviz_pca_var(PCA_cent_res,col.var="contrib",
              gradient.cols = c("yellow", "blue"),
              repel = TRUE,  
 )
 ```
 
-Se observa que; La salud del feto y aceleraciones por segundo van en direcciones contrarias, es decir, estas dos variables afectan al segundo componente pero con signo distinto, las variables desaceleraciones prolongadas (DP) y  Porcentaje de tiempo con variabilidad a largo plazo anormal (ALTV) no estan correlacionadas, ya que sus vectores son perpendiculares, los vectores que mas afectan al primer componente son la media, mediana y moda del histograma de frecuencia fetal.
+Se observa que; La salud del feto y aceleraciones por segundo van en direcciones contrarias, es decir, estas dos variables afectan al segundo componente pero con signo distinto, las variables desaceleraciones prolongadas (DP) y  Porcentaje de tiempo con variabilidad a largo plazo anormal (ALTV) no estan correlacionadas, ya que sus vectores son perpendiculares, los vectores que más afectan al primer componente son la media, mediana y moda del histograma de frecuencia fetal.
 
 
-```{r}
+```{r out.width="60%", fig.align="center", fig.cap= "Figura 3: Gráfico de las PC1 y PC2", echo=FALSE, message=FALSE} 
+
 fviz_pca_ind(PCA_cent_res, col.ind = "cos2", 
              gradient.cols =c("gray", "purple", "beige"),
              repel = F, 
              )
+
 ```
 
-Al gráficar los datos individualemnte notamos que existe un grupo central, y dos grupos secundarios a la izquierda y arriba del grupo central, así que hacemos una nueva base con los componentes principales seleccionados.
+Al gráficar los datos individualmente se nota que existe un grupo central, y dos grupos secundarios a la izquierda y arriba del grupo central, así que se hará una nueva base con los componentes principales seleccionados, ya que con ellos se puede explicar la variación de los datos sin sobre influir en ellos.
 
 ```{r}
 datos_3 <- PCA_cent_res$x[,c("PC1","PC2","PC3")]
@@ -119,10 +124,117 @@ head(datos_3)
 ```
 
 
+# Creación del modelo
 
-# Análisis de Discriminante 
+Como se mencionó al inicio de este reporte el objetivo principal, es determinar como será el estado de salud del siguiente feto que se nos presente, para ello, se usará lo que se conoce como análisis de conglomerados para determinar en cual de los tres grupos se debe agrupar:
+
+## Método de k-means
+
+Este tipo de metodologías es de las más usadas al crear clusters, como se sabe la cantidad de grupos que hay desde un comienzo, una buena opción sería comenzar con este tipo de algoritmo:
+
+Usando el comando `kmeans()` se puede ver que la matriz de confusión de este método se ve:
+
+```{r echo=FALSE}
+modelo_kms <- kmeans(datos_3, centers = 3,nstart = 50)
+
+data_kms = datos_3 %>%  
+  as.data.frame() %>% 
+  mutate(cluster = modelo_kms$cluster) %>%
+  mutate(cluster = as.factor(cluster),
+         tipo   = as.factor(datos$Health)) 
+
+tabla_conf_kms <- table(data_kms$cluster, data_kms$tipo,
+                      dnn = list("cluster", "grupo real"))
+
+tabla_conf_kms
+```
+
+De aquí es posible observar que para el grupo de sanos, el algoritmo los ubica en el cluster 3 para los sopechosos en el cluster 1 y los patológicos en el 2. Sin embargo, se ve que para diferenciar a los sospechosos de si es sano o patológico el algoritmo no funciona muy bien, esto se puede comprobar con algunas medidas de rendimiento:
+
+```{r echo=FALSE}
+confusionMatrix(table(data_kms$cluster,datos$Health))
+```
+
+De esta salida, es posible notar que la `balanced accuarracy` no funciona muy bien y la `specifity` funciona bien solo para algunos casos, si se revisa visualmente, como en la Figura 4, se tiene:
+
+```{r out.width="80%", fig.align="center", fig.cap= "Figura 4: Gráfico de PC1 y PC2, para los datos reales y los del método k-means", echo=FALSE, message=FALSE} 
+
+graf1 <- datos_3 %>%  
+  as.data.frame() %>%
+  mutate(Salud_feto = ifelse(datos$Health == 1, "Sano",ifelse(datos$Health == 2, "Sospechoso","Patologico"))) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = Salud_feto)) +
+  geom_point() +
+  labs(title = "Datos reales después de PCA") 
+
+graf2 <- datos_3 %>% 
+  as.data.frame() %>% 
+  mutate(cluster = as.factor(modelo_kms$cluster)) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = cluster)) +
+  geom_point() +
+  labs(title = "Asignaciones de clusters método K-means")
+
+graf1 + graf2
+
+```
+
+De esta formas es mucho más claro ver que el algoritmo k-means le es difícil determinar en que grupo ubicar los casos sospechoso, ya que comete mucho error, debido a ello, quizás usar otro método sea aceptable.
+
+## Método qda()
+
+Una posible solución para este problema sea utilizar el análisis de discrimantes, especificamente el qda(), esto debido a que como se muestran en los datos originales, estos forman algunas curvas, dando idea de que un ajuste cuadrático, funcionará mucho mejor, armando el algoritmo se tiene que su matriz de confusión es:
+
+```{r echo=FALSE}
+datos_qda <- datos_3 %>%  
+  as.data.frame() %>% 
+  mutate(Salud_feto = factor(datos$Health))
+
+modelo_qda <- qda(Salud_feto ~., datos_qda)
+
+pred_qda <- predict(modelo_qda, datos_qda)$class
+
+tabla_conf_qda <- table(pred_qda, datos$Health,
+                      dnn = list("cluster", "grupo real"))
+
+tabla_conf_qda
+```
+
+A diferencia del método k-means, aquí se asigna a cada grupo el cluster correspondiente. Además, parece que el algoritmo logra diferenciar bastante bien a los sospechosos de las otras clases, esto se puede comprobar con algunas medidas de rendimiento:
+
+```{r echo=FALSE}
+confusionMatrix(table(pred_qda,datos$Health))
+```
+
+Se puede apreciar, que la `balanced accurracy`, `sensitivity` y `specifity`, funcionan mucho mejor, lo que nos da buenos indicios de que el modelo funcionará, si revisamos visualmente usando la Figura 5, se comprueba lo que las medidas de rendimiento, ya predecián:
+
+```{r out.width="80%", fig.align="center", fig.cap= "Figura 5: Gráfico de PC1 y PC2, para los datos reales y los del método qda", echo=FALSE, message=FALSE} 
+
+graf3 <- datos_qda %>%  
+  as.data.frame() %>%
+  mutate(Salud_feto = ifelse(datos$Health == 1, "Sano",ifelse(datos$Health == 2, "Sospechoso","Patologico"))) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = Salud_feto)) +
+  geom_point() +
+  labs(title = "Datos reales después de PCA")
+
+graf4 <- datos_qda %>% 
+  as.data.frame() %>% 
+  mutate(cluster = pred_qda) %>% 
+  ggplot(aes(x = PC1, y = PC2, colour = cluster)) +
+  geom_point() +
+  labs(title = "Asignaciones de clusters método qda")
+
+graf3 + graf4
+```
+
+Con la Figura 5, se confirma la idea de que el método `qda` es una mejor opción.
 
 # Conclusión
 
+El análisis de conglomerados es una buena opción, sin embargo, en ocasiones puede no ser la mejor y existen otros algoritmos que son capaces de elaborar mejores predicciones sobre sus datos, por ejemplo para este caso, el hacer un análisis de discriminante ayuda a rescatar de mejor forma la información, para así poder predecir mejor la información.
+
+Con el modelo propuesto de qda(), es posible identificar la salud del próximo feto que se nos presente, haciendo una combinación lineal de las variables originales.
+
 # Bibliografía
 
+- Fetal Health Classification. (2020). En *kaggle*. [https://www.kaggle.com/datasets/andrewmvd/fetal-health-classification?datasetId=916586&language=R](https://www.kaggle.com/datasets/andrewmvd/fetal-health-classification?datasetId=916586&language=R)
+
+- Curso Análisis Multivariado. (2022). [https://joseperusquia.github.io/multivariate.html#Presentaciones](https://joseperusquia.github.io/multivariate.html#Presentaciones)
