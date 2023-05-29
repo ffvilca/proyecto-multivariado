@@ -1,7 +1,7 @@
 ---
 title: "Proyecto Análisis Multivariado"
 date: "`r Sys.Date()`"
-author: "Mauricio Gómez y Francisca Vilca Sánchez"
+author: "Aaron Mauricio Gómez Jimenéz y Francisca Vilca Sánchez"
 output:
   rmdformats::downcute:
     default_style: "dark"
@@ -22,22 +22,85 @@ library(pracma)
 library(mvnormtest)
 library(MVN)
 library(EnvStats)
+library(GGally)
+library(xfun)
+library(factoextra)
 ```
 
 # Introducción 
 
-En el siguiente reporte, se hará el análisis de la base de datos `salud_fetos.csv` que contiene la información sobre `r nrow(datos)` registros de fetos con las características extraídas de exámenes de cardiotocograma, que luego fueron clasificados por obstetras expertos en el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo principal de proyecto es generar un modelo que sea capaz de predecir el grupo en el que se debería agrupar un nuevo feto dados las características que este presenta.
+En el siguiente reporte, se hará el análisis de la base de datos `salud_fetos.csv` que contiene la información sobre 2126  registros de fetos con las características extraídas de exámenes de cardiotocograma, que luego fueron clasificados por obstetras expertos en el tema en 3 clases: Normal, Sospechar y Patológico. El objetivo principal del proyecto es generar un modelo que sea capaz de predecir el grupo en el que se debería agrupar un nuevo feto dados las características que este presenta.
 
 Para lograr esto, primero revisaremos los datos para comprender como funcionan, luego revisaremos que variables presentan mayor correlación para que con ellas se creé el modelo, una vez seleccionada las variables, mediante el algoritmo k-means se crearán los grupos y luego se revisará que tan bien funciona el modelo.
 
 # Análisis Exploratorio
 
-```{r}
+Cargamos nuestra base de datos y hacemos un resumen para ver que variables y que tipo de variables tenemos
 
+```{r}
+datos <- read.csv("salud_fetos.csv",sep = ",",header = T)
+summary(datos)
+```
+
+Como podemos ver, tenemos 22 variables, todas númericas.
+
+
+Realizaremos un análisis explotario de los datos para ver si encontramos relación entre las variables, o alguna información estadistica que nos ayude a encontrar relaciones, dependencias o grupos que se puedan formar con las variables de nuestra muestra.
+
+Primero, haremos un correlograma de los datos.
+
+```{r}
+correlaciones <- round(cor(datos),3)
+corrplot::corrplot(cor(datos), method = "circle")
+```
+
+Notamos que la variable LB (Frecuencia Cardiaca del Feto) esta relacionada linealmente con la media, moda y mediana.
+Las otra correlaciones como MSTV (Valor promedio de variación)y el peso tiene una relación lineal positiva baja-moderada.
+El número de desaceleraciones ligeras (DL) y el minímo de la frecuencia cárdiaca tiene una relación lineal inversa ligera, aunque tambien DL tiene una relación positiva con el peso.
+
+Al analizar los datos vemos que en muchas variables no existe relación, por lo que filtraremos las variables más significativas en términos de correlación.
+
+```{r}
+datos_2<- datos[,c(which(correlaciones[,22]> 0.2 | correlaciones[,22] < -0.2))]
+str(datos_2)
+```
+Al realizar el filtrado, nos quedamos con 11 variables, es decir redujimos a la mitad las variables iniciales.
+
+```{r}
+head(datos_2)
+```
+
+# Creación de PCA
+
+En el análisis exploratorio de datos hemos descartado algunas variables, pero no significa que tengamos las variables que mejor explican la varianza de los datos, para ello haremos un Análisis de Componentes Principales con las base datos_2, tambien centraremos y reescalaremos los datos e imprimimos un resumen para ver con cuantos componentes alcanzamos una variabilidad significante (70%).
+
+```{r}
+PCA_cent_res <- prcomp(datos_2, center=TRUE, scale=TRUE)
+summary(PCA_cent_res)
+```
+
+La proporción acumulativa de la varianza nos dice que con 3 componentes alcanzamos el 68.47% de las varianza, para confirmar haremos tambien un método gráfico para verificar con la regla del codo.
+
+```{r}
+fviz_screeplot(PCA_cent_res, main="PCA centrado y reescalado",  addlabels = TRUE)
+```
+
+Gráficamente vemos que la curva se dobla en el cuarto componente, ahora dado que dos criterios que se utilizan normalmente nos dicen que nos podemos quedar con 3 y 4 componentes, usaremos otro criterio donde elegimos las lambdas mayores a 1.
+
+```{r}
+PCA_cent_res
 ```
 
 
-# Creación de PCA
+Notamos que solo hay 3 componentes con lambda mayor a 1, así que concluimos que los mas viable es quedarse con 3 componentes principales, veremos graficamente la dirección de las variables, tomando en cuenta solo dos dimensiones (55%).
+
+```{r}
+fviz_pca_var(PCA_cent_res,col.var="contrib",
+             gradient.cols = c("yellow", "red"),
+             repel = TRUE,  
+)
+```
+
 
 # Análisis de Discriminante 
 
