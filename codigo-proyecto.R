@@ -42,7 +42,6 @@ corrplot::corrplot(cor(datos), method = "ellipse")
 #Haciendo un PCA
 PCA_centrado=prcomp(datos, center=TRUE, scale=TRUE)
 PCA_centrado
-fviz_screeplot(PCA, main="PCA",  addlabels = TRUE)
 fviz_screeplot(PCA_centrado, main="PCA centrado y reescalado",  addlabels = TRUE)
 summary(PCA_centrado)
 
@@ -169,6 +168,7 @@ fviz_pca_ind(PCA_centrado, col.ind = "#00AFBB",
 # ideas profe -------------------------------------------------------------
 
 correlaciones <- round(cor(datos),3)
+x11()
 corrplot::corrplot(cor(datos), method = "ellipse")
 
 var_sign <- datos[,c(which(correlaciones[,22]> 0.2 | correlaciones[,22] < -0.2))]
@@ -204,7 +204,7 @@ b <- datos %>%
 a+b
 
 # mejor hacer PCA
-
+x11()
 PCA_centrado_2 <- prcomp(var_sign, center=TRUE, scale=TRUE)
 PCA_centrado_2
 fviz_screeplot(PCA_centrado_2, main="PCA centrado y reescalado",  addlabels = TRUE)

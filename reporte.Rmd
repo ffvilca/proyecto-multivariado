@@ -102,6 +102,9 @@ fviz_pca_var(PCA_cent_res,col.var="contrib",
 ```
 
 
+
+
+
 # Análisis de Discriminante 
 
 # Conclusión
