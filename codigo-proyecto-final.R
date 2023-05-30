@@ -89,10 +89,9 @@ data_kms = datos_3 %>%
          tipo   = as.factor(datos$Health)) 
 
 tabla_conf_kms <- table(data_kms$cluster, data_kms$tipo,
-                      dnn = list("cluster", "grupo real"))
+                        dnn = list("cluster", "grupo real"))
 
-
-confusionMatrix(table(data_kms$cluster,datos$Health))
+tabla_conf_kms
 
 graf1 <- datos_3 %>%  
   as.data.frame() %>%
